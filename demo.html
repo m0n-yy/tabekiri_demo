@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>たべキリ！ - オートデモ版</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        /* --- CSS デザイン --- */
+        :root {
+            --primary: #FF9F43; --secondary: #2ECC71; --bg: #fffbf0;
+            --text: #5d4037; --accent: #FF6B6B; --admin-color: #5f27cd;
+            --twitter: #1DA1F2; --line: #06C755; --warning: #ff4757;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg); color: var(--text); margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+        
+        /* ヘッダー */
+        header {
+            background-color: white; width: 100%; padding: 10px 0; text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 500;
+            display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; user-select: none;
+        }
+        h1 { margin: 0; color: var(--primary); font-size: 22px; }
+        .header-icon { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        /* デモ中バッジ */
+        .demo-badge { font-size:10px; background:var(--accent); color:white; padding:2px 6px; border-radius:4px; margin-left:5px; animation:blink 2s infinite;}
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+        /* 通知バナー (復活) */
+        #notification-banner {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background-color: var(--accent); color: white; padding: 10px 20px;
+            border-radius: 30px; box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            font-weight: bold; z-index: 2000; transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; gap: 10px; width: max-content; white-space: nowrap;
+        }
+        .banner-icon { width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; object-fit: cover;}
+
+        /* 実績ダッシュボード */
+        #dashboard {
+            width: 90%; max-width: 600px; background: white; margin: 15px 0; padding: 15px;
+            border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-around; align-items: center;
+            background: linear-gradient(135deg, #fff, #fff8e1);
+        }
+        .stat-box { text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: var(--primary); display: block; }
+        .stat-label { font-size: 11px; color: #888; }
+        .rank-badge { font-size: 12px; background: var(--secondary); color: white; padding: 3px 8px; border-radius: 10px; margin-top: 5px; display:inline-block;}
+        .btn-invite { background: var(--text); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; }
+
+        /* マップ */
+        #map-container { width: 100%; height: 250px; background: #ddd; position: relative; z-index: 1; }
+        #map { width: 100%; height: 100%; }
+
+        .view-container { width: 90%; max-width: 600px; margin-top: 20px; padding-bottom: 80px; display: none; }
+        #user-view { display: grid; gap: 20px; }
+
+        /* カルーセル・カード */
+        .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin-bottom: 10px; border-radius: 8px; }
+        .carousel img { flex: 0 0 100%; height: 180px; object-fit: cover; border-radius: 8px; scroll-snap-align: start; }
+        .carousel::-webkit-scrollbar { display: none; }
+        
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; transition: all 0.5s ease; }
+        /* 新着アニメーション */
+        @keyframes slideDown { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
+        .card.new-item { animation: slideDown 0.5s ease forwards; }
+
+        .card.is-kept { border: 2px solid var(--primary); background: #fffbf0; }
+        
+        .badge-off { position: absolute; top: -8px; left: -8px; z-index: 10; background: var(--accent); color: white; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 12px; }
+        .card-content-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px;}
+        .food-info { flex: 1; display: flex; align-items: center; gap: 10px; }
+        .emoji { font-size: 32px; background: #f0f0f0; border-radius: 50%; width: 50px; height: 50px; display:flex; align-items:center; justify-content:center; flex-shrink: 0;}
+        .details h3 { margin: 0; font-size: 16px; }
+        .shop-address { font-size: 10px; color: #999; display: block; margin-top: 2px;}
+        .price { color: #888; text-decoration: line-through; font-size: 12px; }
+        .discount { color: #e74c3c; font-weight: bold; font-size: 18px; margin-left: 5px;}
+        
+        .btn-group { display: flex; flex-direction: column; gap: 8px; margin-left: 10px;}
+        button { border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; color: white; font-size: 12px; width: 90px;}
+        .btn-buy { background-color: var(--primary); }
+        .btn-eat { background-color: var(--secondary); }
+        button:disabled { background-color: #eee; color: #aaa; cursor: not-allowed; }
+
+        /* 店長画面 */
+        #admin-view { background: white; padding: 25px; border-radius: 15px; border-top: 5px solid var(--admin-color); }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-scan { background: #333; color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; cursor: pointer; border:none;}
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px;}
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .btn-add { width: 100%; background-color: var(--admin-color); color: white; padding: 12px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; }
+
+        /* モーダル系 */
+        #scanner-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:4000; flex-direction:column; align-items:center; justify-content:center; color:white;}
+        #reader { width: 300px; height: 300px; background: #000; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 80%; max-width: 350px; animation: popIn 0.3s ease; position: relative; }
+        .modal-ururu { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 4px solid var(--primary); margin-top: -50px; background: white; }
+        
+        .share-area { margin: 15px 0; display: flex; justify-content: center; gap: 10px; }
+        .btn-share { padding: 8px 15px; border-radius: 20px; font-size: 12px; color: white; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap:5px;}
+        .share-x { background-color: #000; } 
+        .share-line { background-color: var(--line); }
+        
+        .coupon-box { border: 2px dashed var(--primary); padding: 15px; margin: 10px 0; background: #fff8e1; color: var(--primary); font-weight: bold; cursor: pointer; }
+        #coupon-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 3000; flex-direction: column; align-items: center; justify-content: center; }
+        #qrcode { margin: 20px; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header id="app-header">
+        <img src="ururu.jpg" class="header-icon" onerror="this.style.display='none'">
+        <h1 id="app-title">たべキリ！<span class="demo-badge">DEMO</span></h1>
+    </header>
+
+    <div id="notification-banner">
+        <img src="ururu.jpg" class="banner-icon" onerror="this.style.display='none'">
+        <span id="banner-text">新しい商品が出ました！</span>
+    </div>
+
+    <div id="dashboard">
+        <div class="stat-box">
+            <span class="stat-label">レスキュー数</span>
+            <span class="stat-value" id="disp-count">0</span>
+            <div class="rank-badge" id="disp-rank">ビギナー</div>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">節約できた金額</span>
+            <span class="stat-value" id="disp-money">0円</span>
+        </div>
+        <button class="btn-invite" onclick="inviteFriend()">💌 招待</button>
+    </div>
+
+    <div id="map-container"><div id="map"></div></div>
+
+    <div id="user-view" class="view-container" style="display: grid;"></div>
+
+    <div id="admin-view" class="view-container">
+        <div class="admin-header">
+            <h2 class="admin-title">店長メニュー</h2>
+            <button class="btn-scan" onclick="startScanner()">📷 スキャン</button>
+        </div>
+        <h3 style="font-size:16px; margin-top:20px;">新規商品追加</h3>
+        <div class="input-group"><label>住所</label><input type="text" id="input-address" placeholder="例：川口市上青木3-1-40"></div>
+        <div class="input-group"><label>店名</label><input type="text" id="input-shop" placeholder="例：川口食堂"></div>
+        <div class="input-group"><label>商品名</label><input type="text" id="input-name" placeholder="例：日替わりランチ"></div>
+        <div class="input-group"><label>アイコン</label>
+            <select id="input-icon">
+                <option value="🍙">🍙 おにぎり</option><option value="🍱">🍱 お弁当</option><option value="🥪">🥪 パン</option>
+                <option value="🥐">🥐 ベーカリー</option><option value="🍜">🍜 ラーメン</option><option value="🍰">🍰 スイーツ</option>
+                <option value="🐟">🐟 魚介</option><option value="🍖">🍖 お肉</option>
+            </select>
+        </div>
+        <div class="input-group"><label>画像URL(カンマ区切り)</label><textarea id="input-images" rows="2"></textarea></div>
+        <div class="input-group" style="display:flex; gap:10px;">
+            <div style="flex:1;"><label>定価</label><input type="number" id="input-old"></div>
+            <div style="flex:1;"><label>割引後</label><input type="number" id="input-new"></div>
+        </div>
+        <button class="btn-add" onclick="addNewProduct()">登録する</button>
+    </div>
+
+    <div id="scanner-modal">
+        <h3 style="color:white;">QR読取</h3><div id="reader"></div>
+        <button onclick="stopScanner()" style="margin-top:20px; background:white; color:black; width:auto; padding:10px;">閉じる</button>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <img src="ururu.jpg" class="modal-ururu" onerror="this.style.display='none'">
+            <h2 id="msg-title"></h2><p id="msg-text"></p>
+            <div id="share-area" class="share-area" style="display:none;">
+                <a href="#" id="share-x" class="btn-share share-x" target="_blank">Xで共有</a>
+                <a href="#" id="share-line" class="btn-share share-line" target="_blank">LINEで共有</a>
+            </div>
+            <div id="coupon-area" style="display:none;">
+                <div class="coupon-box" onclick="showCouponScreen()">🈹 クーポンを表示</div>
+            </div>
+            <button class="btn-buy" id="modal-close-btn" onclick="closeModal()">閉じる</button>
+        </div>
+    </div>
+
+    <div id="coupon-screen">
+        <h2>クーポン提示</h2><p>店長に見せてください</p>
+        <div id="qrcode"></div>
+        <button class="btn-buy" onclick="finishCoupon()">使用済にする</button>
+    </div>
+
+    <script>
+        /* --- ロジック --- */
+        const userView = document.getElementById('user-view');
+        const adminView = document.getElementById('admin-view');
+        const appHeader = document.getElementById('app-header');
+        let currentCard = null; let markers = [];
+        let currentKeptItems = 0; // 手元の数
+
+        // 実績データ
+        let userStats = JSON.parse(localStorage.getItem('tabekiri_stats')) || { count: 0, money: 0 };
+        updateDashboard();
+
+        function updateDashboard() {
+            document.getElementById('disp-count').innerText = userStats.count;
+            document.getElementById('disp-money').innerText = userStats.money.toLocaleString() + "円";
+            let rank = "ビギナー";
+            if(userStats.count >= 3) rank = "フードレスキュアー";
+            if(userStats.count >= 10) rank = "アースヒーロー";
+            document.getElementById('disp-rank').innerText = rank;
+        }
+
+        function saveStats(moneySaved) {
+            userStats.count++; userStats.money += parseInt(moneySaved);
+            localStorage.setItem('tabekiri_stats', JSON.stringify(userStats));
+            updateDashboard();
+        }
+        function inviteFriend() {
+            const text = "食品ロス削減アプリ「たべキリ！」\nここから始めてね 👇"; const url = window.location.href;
+            if (navigator.share) { navigator.share({ title: 'たべキリ！', text: text, url: url }).catch(()=>{}); }
+            else { alert("URLをコピーしました！\n" + url); }
+        }
+
+        // マップ初期化 (川口)
+        const map = L.map('map').setView([35.8285, 139.7214], 14); 
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+
+        // 商品表示関数
+        function addProductToScreen(item, isAuto = false) {
+            const percent = Math.floor(((item.oldPrice - item.newPrice) / item.oldPrice) * 100);
+            const savedMoney = item.oldPrice - item.newPrice;
+            const card = document.createElement('div');
+            
+            // 自動追加された商品はアニメーション付きクラス
+            card.className = isAuto ? 'card new-item' : 'card';
+            
+            card.dataset.saved = savedMoney;
+            card.dataset.name = item.name; 
+            card.dataset.productName = item.name;
+
+            let imagesHTML = '';
+            if (item.images && item.images.length > 0) {
+                imagesHTML = '<div class="carousel">';
+                item.images.forEach(url => { imagesHTML += `<img src="${url.trim()}" onerror="this.src='https://placehold.co/400x300?text=No+Image'">`; });
+                imagesHTML += '</div>';
+            }
+            card.innerHTML = `
+                <div class="badge-off">${percent}% OFF</div>
+                ${imagesHTML}
+                <div class="card-content-row">
+                    <div class="food-info">
+                        <div class="emoji">${item.icon}</div>
+                        <div class="details">
+                            <span class="shop-address">🏠 ${item.shop}</span>
+                            <h3>${item.name}</h3>
+                            <div class="price-area"><span class="price">${item.oldPrice}円</span> → <span class="discount">${item.newPrice}円</span></div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-buy btn-step1" onclick="handleBuy(this)">買いトク！</button>
+                        <button class="btn-eat btn-step2" onclick="handleEat(this)" disabled>たべキリ！</button>
+                    </div>
+                </div>
+            `;
+            userView.prepend(card);
+            const marker = L.marker([item.lat, item.lng]).addTo(map).bindPopup(`<b>${item.shop}</b><br>${item.icon} ${item.name}`);
+            markers.push({ marker, card });
+
+            // 通知を表示 (自動追加時)
+            if(isAuto) {
+                const banner = document.getElementById('notification-banner');
+                document.getElementById('banner-text').innerText = `🔔 新着！${item.name}が出品されました`;
+                banner.style.top = "20px";
+                setTimeout(() => { banner.style.top = "-100px"; }, 3000);
+            }
+        }
+
+        /* --- ユーザー操作 --- */
+        function handleBuy(btn) { 
+            if (currentKeptItems >= 3) {
+                const check = confirm("⚠️ 警告\n現在3つの商品を購入中です。\n買いすぎも食品ロスの原因になります。\n\n本当に食べきれますか？");
+                if (!check) return;
+            }
+            currentCard = btn.closest('.card'); 
+            currentCard.classList.add('is-kept'); 
+            currentKeptItems++; 
+            openModal("buy"); 
+        }
+
+        function handleEat(btn) { currentCard = btn.closest('.card'); openModal("eat"); }
+
+        function openModal(type) {
+            const m=document.getElementById('modal'), t=document.getElementById('msg-title'), tx=document.getElementById('msg-text');
+            const ca=document.getElementById('coupon-area'), sa=document.getElementById('share-area'), cb=document.getElementById('modal-close-btn');
+
+            if(type==="buy"){ 
+                t.innerText="🎉 購入報告"; tx.innerText="レスキューありがとう！\n美味しく食べてね。"; 
+                ca.style.display="none"; sa.style.display="none"; cb.onclick=afterBuyAction; 
+            } else { 
+                t.innerText="😋 完食報告"; tx.innerText="完食ありがとう！\nうるるちゃんからクーポンです。"; 
+                ca.style.display="block"; sa.style.display="flex"; 
+                const shareText = `「${currentCard.dataset.name}」を完食して食品ロスを減らしました！\n#たべキリ #食品ロス削減`;
+                const appUrl = window.location.href;
+                document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(appUrl)}`;
+                document.getElementById('share-line').href = `https://line.me/R/msg/text/?${encodeURIComponent(shareText + " " + appUrl)}`;
+                cb.onclick=closeModal; 
+            }
+            m.style.display='flex';
+        }
+
+        function closeModal(){ document.getElementById('modal').style.display='none'; }
+        function afterBuyAction(){ 
+            closeModal(); 
+            if(currentCard){ 
+                currentCard.querySelector('.btn-step1').style.display='none'; 
+                const b2=currentCard.querySelector('.btn-step2'); b2.disabled=false; b2.innerText="たべキリ！"; 
+            }
+        }
+        function showCouponScreen(){
+            closeModal(); document.getElementById('coupon-screen').style.display='flex'; document.getElementById('qrcode').innerHTML="";
+            new QRCode(document.getElementById("qrcode"), { text: "TABEKIRI-" + Date.now(), width: 200, height: 200 });
+        }
+        function finishCoupon(){
+            document.getElementById('coupon-screen').style.display='none';
+            if(currentCard){
+                saveStats(currentCard.dataset.saved);
+                currentKeptItems--;
+                currentCard.style.transform="scale(0)"; 
+                const t=markers.find(m=>m.card===currentCard); if(t)map.removeLayer(t.marker);
+                setTimeout(()=>{currentCard.remove();currentCard=null;},300);
+            }
+            alert("クーポンを使用しました！\n実績が更新されました🎉");
+        }
+
+        /* --- 店長機能 --- */
+        let html5QrcodeScanner = null;
+        function startScanner() {
+            document.getElementById('scanner-modal').style.display = 'flex';
+            if (html5QrcodeScanner) html5QrcodeScanner.clear();
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            html5QrcodeScanner.render((txt)=>{ alert("✅ 確認完了: " + txt); stopScanner(); }, (err)=>{});
+        }
+        function stopScanner() { document.getElementById('scanner-modal').style.display = 'none'; if(html5QrcodeScanner) html5QrcodeScanner.clear(); }
+        
+        async function addNewProduct() {
+            const address = document.getElementById('input-address').value;
+            const shop = document.getElementById('input-shop').value;
+            const name = document.getElementById('input-name').value;
+            const icon = document.getElementById('input-icon').value;
+            const oldP = document.getElementById('input-old').value;
+            const newP = document.getElementById('input-new').value;
+            const imagesInput = document.getElementById('input-images').value;
+            if(!address||!shop||!name||!oldP||!newP) return alert("未入力あり");
+
+            // 店長アラート (作りすぎ防止)
+            const existingCards = document.querySelectorAll('.card');
+            let duplicateCount = 0;
+            existingCards.forEach(card => { if (card.dataset.productName === name) duplicateCount++; });
+            if (duplicateCount >= 2) {
+                const check = confirm(`⚠️ 在庫過多の警告\n「${name}」は既に${duplicateCount}件登録されています。\n本当に登録しますか？`);
+                if (!check) return;
+            }
+
+            const imageArray = imagesInput.split(',').filter(u=>u.trim()!=="");
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+                const data = await res.json();
+                let lat = 35.8285, lng = 139.7214; if(data.length>0){lat=data[0].lat;lng=data[0].lon;}
+                addProductToScreen({shop,address,name,oldPrice:oldP,newPrice:newP,icon,images:imageArray,lat,lng});
+                toggleView(false);
+                document.getElementById('input-address').value=""; document.getElementById('input-shop').value=""; document.getElementById('input-name').value=""; document.getElementById('input-images').value="";
+            } catch(e){ alert("エラー"); }
+        }
+
+        let tapCount = 0;
+        appHeader.addEventListener('click', () => { tapCount++; if(tapCount===5){ if(prompt("Pass")==='0000') toggleView(true); tapCount=0; } });
+        function toggleView(isAdmin){ userView.style.display=isAdmin?'none':'grid'; adminView.style.display=isAdmin?'block':'none'; document.getElementById('map-container').style.display=isAdmin?'none':'block'; document.getElementById('dashboard').style.display=isAdmin?'none':'flex'; map.invalidateSize(); }
+
+        /* ========================================= */
+        /* 🤖 デモ用：自動商品追加ロジック (ここが新機能) */
+        /* ========================================= */
+        
+        const demoData = [
+            { shop: "学食カフェ KAWAGUCHI", address: "川口市立高等学校", name: "唐揚げ定食", oldPrice: 600, newPrice: 300, icon: "🍱", images: ["https://images.unsplash.com/photo-1606509653655-074900dc3071?w=500"] },
+            { shop: "ベーカリー・スキップ", address: "上青木3丁目", name: "クロワッサン詰め合わせ", oldPrice: 800, newPrice: 350, icon: "🥐", images: ["https://images.unsplash.com/photo-1555507036-ab1f40388085?w=500"] },
+            { shop: "らーめん道場 炎", address: "前川", name: "特製味噌ラーメン", oldPrice: 950, newPrice: 500, icon: "🍜", images: ["https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=500"] },
+            { shop: "スイーツ・ガーデン", address: "西川口駅周辺", name: "ショートケーキ", oldPrice: 500, newPrice: 200, icon: "🍰", images: ["https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500"] },
+            { shop: "コンビニ・スマイル", address: "川口駅東口", name: "おにぎりセット", oldPrice: 300, newPrice: 100, icon: "🍙", images: ["https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=500"] }
+        ];
+
+        // ページ読み込み完了時
+        window.onload = function() {
+            // 初期データ1つ追加
+            addProductToScreen({ ...demoData[0], lat: 35.8285, lng: 139.7214 });
+
+            // 7秒ごとに自動追加を開始
+            setInterval(() => {
+                // 1. ランダムな商品を選ぶ
+                const item = demoData[Math.floor(Math.random() * demoData.length)];
+                
+                // 2. 価格を少し変動させる（リアル感）
+                const randomDiscount = Math.floor(Math.random() * 5) * 10; // 0~40円の変動
+                const newItem = {
+                    ...item,
+                    newPrice: item.newPrice - randomDiscount,
+                    // 3. 座標を少しずらす（ピンが重ならないように）
+                    lat: 35.8285 + (Math.random() - 0.5) * 0.015,
+                    lng: 139.7214 + (Math.random() - 0.5) * 0.015
+                };
+
+                // 4. 追加実行 (isAutoフラグをtrueに)
+                addProductToScreen(newItem, true);
+
+            }, 7000); // 7000ミリ秒 = 7秒
+        };
+
+    </script>
+</body>
+</html>
