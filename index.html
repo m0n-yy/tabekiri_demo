@@ -16,13 +16,13 @@
         :root {
             --primary: #FF9F43; --secondary: #2ECC71; --bg: #fffbf0;
             --text: #5d4037; --accent: #FF6B6B; --admin-color: #5f27cd;
-            --gold: #f1c40f;
+            --gold: #f1c40f; --twitter: #1DA1F2; --line: #06C755;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg); color: var(--text); margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            padding-bottom: 70px; /* タブバーの分 */
+            padding-bottom: 80px; /* タブバーの分 */
         }
         
         /* ヘッダー */
@@ -48,7 +48,7 @@
 
         /* 実績ダッシュボード */
         #dashboard {
-            width: 90%; max-width: 600px; background: white; margin: 15px 0; padding: 15px;
+            width: 90%; max-width: 600px; background: white; margin: 20px 0 15px 0; padding: 15px;
             border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             display: flex; justify-content: space-around; align-items: center;
             background: linear-gradient(135deg, #fff, #fff8e1); position: relative;
@@ -56,8 +56,6 @@
         .stat-box { text-align: center; }
         .stat-value { font-size: 20px; font-weight: bold; color: var(--primary); display: block; }
         .stat-label { font-size: 10px; color: #888; }
-        
-        /* ユーザー名表示 */
         .user-greeting { position: absolute; top: -25px; left: 10px; font-size: 12px; font-weight: bold; color: var(--text); }
         .btn-invite { background: var(--text); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
@@ -72,7 +70,6 @@
         /* 商品カード */
         .card-list { width: 90%; display: grid; gap: 15px; }
         .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; transition: all 0.3s; }
-        .card.is-kept { border: 2px solid var(--primary); background: #fffbf0; }
         .card.new-item { animation: slideDown 0.5s ease forwards; }
         @keyframes slideDown { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
         
@@ -108,12 +105,8 @@
         .ticket-exp { font-size: 10px; color: #aaa; }
         .btn-use { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; z-index: 2; cursor: pointer;}
 
-        /* 履歴 */
+        /* 履歴・ランキング */
         .history-item { background: white; border-bottom: 1px solid #eee; padding: 15px; width: 90%; display: flex; justify-content: space-between; align-items: center; }
-        .history-stars { color: var(--gold); font-size: 12px; }
-        .history-date { font-size: 10px; color: #aaa; }
-
-        /* ランキング */
         .ranking-item { background: white; width: 90%; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .rank-num { font-size: 20px; font-weight: bold; width: 30px; text-align: center; color: var(--primary);}
         .rank-user { flex: 1; font-weight: bold; }
@@ -122,20 +115,29 @@
         .btn-add-friend { background: #333; color: white; padding: 10px 20px; border-radius: 20px; margin-bottom: 20px; cursor: pointer; }
 
         /* 下部タブバー */
-        .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .tab-btn { display: flex; flex-direction: column; align-items: center; color: #aaa; cursor: pointer; font-size: 10px; }
-        .tab-btn i { font-size: 20px; margin-bottom: 3px; }
-        .tab-btn.active { color: var(--primary); }
+        .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 10px;}
+        .tab-btn { display: flex; flex-direction: column; align-items: center; color: #aaa; cursor: pointer; font-size: 10px; width: 20%;}
+        .tab-btn i { font-size: 18px; margin-bottom: 3px; }
+        .tab-btn.active { color: var(--primary); font-weight: bold;}
 
         /* モーダル */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 3000; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 350px; position: relative; animation: popIn 0.3s ease; }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        /* うるるアニメーション */
+        .modal-ururu { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 4px solid var(--primary); margin-top: -60px; background: white; animation: bounce 0.5s ease; display: block; margin-left: auto; margin-right: auto; margin-bottom: 10px;}
+        @keyframes bounce { 0%{transform: scale(0);} 60%{transform: scale(1.1);} 100%{transform: scale(1);} }
+
+        /* SNSシェアボタン */
+        .share-area { margin: 15px 0; display: flex; justify-content: center; gap: 10px; width: 100%; }
+        .btn-share { padding: 8px 15px; border-radius: 20px; font-size: 12px; color: white; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap:5px; flex:1; justify-content: center;}
+        .share-x { background-color: #000; } 
+        .share-line { background-color: var(--line); }
+
         .rating-area { margin: 15px 0; font-size: 24px; color: #ddd; cursor: pointer; }
         .rating-area span:hover, .rating-area span.checked { color: var(--gold); }
         #scanner-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:4000; flex-direction:column; align-items:center; justify-content:center; color:white;}
         #reader { width: 300px; height: 300px; background: #000; }
-        /* アカウント登録モーダル */
         #account-modal { display: none; z-index: 5000; background: rgba(0,0,0,0.8); }
 
         .input-group { margin-bottom: 10px; text-align: left; width: 100%;}
@@ -171,39 +173,33 @@
                 <i class="fas fa-paper-plane"></i> 招待
             </button>
         </div>
-
         <div id="map-container"><div id="map"></div></div>
         <div id="user-view" class="card-list"></div>
     </div>
 
-    <div id="tab-coupon" class="tab-content">
-        <h2 style="color:var(--text); font-size:18px; margin:20px 0;">🎟️ マイクーポン</h2>
-        <div id="coupon-list" style="width:100%; display:flex; flex-direction:column; align-items:center;">
-            <p style="color:#aaa; font-size:12px;">まだクーポンがありません</p>
-        </div>
+    <div id="tab-pantry" class="tab-content">
+        <h2 style="color:var(--text); font-size:18px; margin:20px 0;">📦 マイルーム</h2>
+        <p style="font-size:12px; color:#666;">買いトク中の商品（冷蔵庫の中身）</p>
+        <div id="pantry-list" class="card-list" style="margin-top:10px;"></div>
     </div>
 
-    <div id="tab-history" class="tab-content">
-        <h2 style="color:var(--text); font-size:18px; margin:20px 0;">📜 レスキュー履歴</h2>
-        <div id="history-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+    <div id="tab-coupon" class="tab-content">
+        <h2 style="color:var(--text); font-size:18px; margin:20px 0;">🎟️ マイクーポン</h2>
+        <div id="coupon-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
     </div>
 
     <div id="tab-ranking" class="tab-content">
         <h2 style="color:var(--text); font-size:18px; margin:20px 0;">🏆 友達と競争</h2>
         <button class="btn-add-friend" onclick="addFriend()">➕ 友達を追加する</button>
-        <div id="ranking-list" style="width:100%; display:flex; flex-direction:column; align-items:center;">
-            </div>
+        <div id="ranking-list" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
     </div>
 
     <div id="admin-view" class="tab-content" style="background:white; padding:20px; box-sizing:border-box;">
         <h2 style="color:var(--admin-color);">👨‍🍳 店長メニュー</h2>
         <button onclick="startScanner()" style="background:#333; color:white; padding:10px; width:100%; margin-bottom:20px;">📷 QRスキャン</button>
-        
         <h3>商品追加</h3>
-        <div class="input-group"><label>住所</label><input type="text" id="input-address"></div>
         <div class="input-group"><label>店名</label><input type="text" id="input-shop"></div>
         <div class="input-group"><label>商品名</label><input type="text" id="input-name"></div>
-        <div class="input-group"><label>クーポン名</label><input type="text" id="input-coupon-title" placeholder="お菓子プレゼント"></div>
         <div class="input-group"><label>価格(定価 -> 割引)</label>
             <div style="display:flex; gap:10px;"><input type="number" id="input-old"><input type="number" id="input-new"></div>
         </div>
@@ -212,21 +208,29 @@
 
     <div class="tab-bar">
         <div class="tab-btn active" onclick="switchTab('home')"><i class="fas fa-home"></i>ホーム</div>
+        <div class="tab-btn" onclick="switchTab('pantry')"><i class="fas fa-box-open"></i>マイルーム</div>
         <div class="tab-btn" onclick="switchTab('coupon')"><i class="fas fa-ticket-alt"></i>クーポン</div>
-        <div class="tab-btn" onclick="switchTab('history')"><i class="fas fa-history"></i>履歴</div>
         <div class="tab-btn" onclick="switchTab('ranking')"><i class="fas fa-crown"></i>順位</div>
     </div>
 
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h2 id="modal-title"></h2><p id="modal-text"></p>
+            <img src="ururu.jpg" class="modal-ururu" onerror="this.style.display='none'">
+            <h2 id="modal-title"></h2>
+            <p id="modal-text"></p>
+            
+            <div id="share-area" class="share-area" style="display:none;">
+                <a href="#" id="share-x" class="btn-share share-x" target="_blank"><i class="fab fa-twitter"></i> ポスト</a>
+                <a href="#" id="share-line" class="btn-share share-line" target="_blank"><i class="fab fa-line"></i> LINE</a>
+            </div>
+
             <div id="rating-stars" class="rating-area" style="display:none;">
                 <span onclick="setRating(1)">★</span><span onclick="setRating(2)">★</span><span onclick="setRating(3)">★</span><span onclick="setRating(4)">★</span><span onclick="setRating(5)">★</span>
             </div>
             <div id="qr-area" style="margin:20px 0; display:none;">
                 <div id="qrcode"></div><p style="font-size:10px; color:#aaa;">店員さんに見せてください</p>
             </div>
-            <button id="modal-btn" style="background:var(--primary); width:100%; padding:10px; font-size:14px;">OK</button>
+            <button id="modal-btn" style="background:var(--primary); width:100%; padding:10px; font-size:14px; border:none; border-radius:20px; color:white; font-weight:bold; cursor:pointer;">OK</button>
         </div>
     </div>
 
@@ -235,7 +239,7 @@
             <h2 style="color:var(--primary);">ようこそ！</h2>
             <p>ニックネームを教えてください</p>
             <input type="text" id="input-nickname" placeholder="例: たべキリ太郎" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; margin:10px 0;">
-            <button onclick="registerAccount()" style="background:var(--secondary); color:white; width:100%; padding:10px;">はじめる</button>
+            <button onclick="registerAccount()" style="background:var(--secondary); color:white; width:100%; padding:10px; border:none; border-radius:20px; cursor:pointer;">はじめる</button>
         </div>
     </div>
 
@@ -248,29 +252,22 @@
         // --- データ管理 ---
         let userName = localStorage.getItem('tb_username');
         let userStats = JSON.parse(localStorage.getItem('tb_stats')) || { count: 0, money: 0 };
+        let myPantry = JSON.parse(localStorage.getItem('tb_pantry')) || []; // 買いトク中の商品
         let myCoupons = JSON.parse(localStorage.getItem('tb_coupons')) || []; 
         let myHistory = JSON.parse(localStorage.getItem('tb_history')) || []; 
-        let myFriends = JSON.parse(localStorage.getItem('tb_friends')) || [
-            {name: "たべキリ神", count: 128}, {name: "エコ番長", count: 85}, {name: "のぞみ", count: 42}
-        ]; // 初期友達(ダミー)
+        let myFriends = JSON.parse(localStorage.getItem('tb_friends')) || [{name: "たべキリ神", count: 128}, {name: "エコ番長", count: 85}, {name: "のぞみ", count: 42}];
         
-        let currentKept = 0; 
         let userLat = 35.8285, userLng = 139.7214; 
         const map = L.map('map').setView([userLat, userLng], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '&copy; OSM' }).addTo(map);
-        let markers = [];
 
         window.onload = function() {
-            // アカウントチェック
-            if (!userName) {
-                document.getElementById('account-modal').style.display = 'flex';
-            } else {
-                document.getElementById('user-name-display').innerText = userName;
-            }
+            if (!userName) document.getElementById('account-modal').style.display = 'flex';
+            else document.getElementById('user-name-display').innerText = userName;
 
             updateDashboard();
+            renderPantry();
             renderCoupons();
-            renderHistory();
             renderRanking();
             
             if(navigator.geolocation) {
@@ -284,82 +281,33 @@
             startAutoDemo();
         };
 
-        // --- アカウント登録 ---
         function registerAccount() {
             const name = document.getElementById('input-nickname').value;
             if(!name) return alert("名前を入れてね");
-            userName = name;
-            localStorage.setItem('tb_username', userName);
+            userName = name; localStorage.setItem('tb_username', userName);
             document.getElementById('user-name-display').innerText = userName;
             document.getElementById('account-modal').style.display = 'none';
-            renderRanking(); // ランキングの名前も更新
+            renderRanking();
         }
 
-        // --- 友達追加機能 ---
-        function addFriend() {
-            const friendName = prompt("友達の名前を入力して追加！");
-            if(friendName) {
-                // 自分に近いスコアをランダム生成して競争感を出す
-                const randomScore = Math.floor(Math.random() * 20) + Math.max(0, userStats.count - 5);
-                myFriends.push({ name: friendName, count: randomScore });
-                localStorage.setItem('tb_friends', JSON.stringify(myFriends));
-                renderRanking();
-                alert(`${friendName}さんを追加しました！\n負けないように頑張ろう！`);
-            }
-        }
-
-        // --- ランキング表示 ---
-        function renderRanking() {
-            const list = document.getElementById('ranking-list');
-            const myData = { name: userName || "あなた", count: userStats.count, isMe: true };
-            // 友達リストと自分を結合してソート
-            let all = [...myFriends, myData].sort((a,b) => b.count - a.count);
-            
-            list.innerHTML = "";
-            all.forEach((u, i) => {
-                const cls = u.isMe ? "ranking-item rank-you" : "ranking-item";
-                const medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : '';
-                list.innerHTML += `
-                    <div class="${cls}">
-                        <div class="rank-num">${medal || i+1}</div>
-                        <div class="rank-user">${u.name}</div>
-                        <div class="rank-score">${u.count}回</div>
-                    </div>
-                `;
-            });
-        }
-
-        // --- 招待機能 (復活) ---
-        function inviteFriend() {
-            const text = `食品ロス削減アプリ「たべキリ！」\n私(${userName})と一緒に競い合おう！\nここから始めてね 👇`;
-            const url = window.location.href;
-            if (navigator.share) {
-                navigator.share({ title: 'たべキリ！', text: text, url: url }).catch(()=>{});
-            } else {
-                alert("URLをコピーしました！友達に送ってね\n" + url);
-            }
-        }
-
-        // --- 以下、既存ロジック ---
         function updateDashboard() {
             document.getElementById('disp-count').innerText = userStats.count;
             document.getElementById('disp-money').innerText = userStats.money.toLocaleString() + "円";
         }
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; const φ1 = lat1 * Math.PI/180, φ2 = lat2 * Math.PI/180;
-            const Δφ = (lat2-lat1) * Math.PI/180, Δλ = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
+
+        // --- 商品追加 (ホーム) ---
         function addProduct(item, isAuto=false) {
-            const dist = getDistance(userLat, userLng, item.lat, item.lng);
-            if(dist > 5000) return;
+            // マイルームにある商品はホームに出さない
+            if(myPantry.some(p => p.id === item.id)) return;
+
             const card = document.createElement('div');
             card.className = isAuto ? 'card new-item' : 'card';
-            card.itemData = item; 
+            card.itemData = item;
+            
             const percent = Math.floor(((item.oldPrice - item.newPrice) / item.oldPrice) * 100);
             let imgHTML = '';
             if(item.images && item.images.length) { imgHTML = `<div class="carousel">${item.images.map(u=>`<img src="${u}">`).join('')}</div>`; }
+            
             card.innerHTML = `
                 <div class="badge-off">${percent}% OFF</div> ${imgHTML}
                 <div class="card-content-row">
@@ -368,43 +316,102 @@
                         <div class="details">
                             <span class="shop-address">🏠 ${item.shop}</span>
                             <h3>${item.name}</h3>
-                            <span class="coupon-tag">🎟️ ${item.couponTitle || 'クーポン'}</span>
                             <div style="margin-top:5px;"><span style="text-decoration:line-through; color:#aaa;">${item.oldPrice}</span> → <span style="font-weight:bold; color:red;">${item.newPrice}円</span></div>
                         </div>
                     </div>
                     <div class="btn-group">
                         <button class="btn-buy" onclick="handleBuy(this)">買いトク！</button>
-                        <button class="btn-eat" onclick="handleEat(this)" disabled>たべキリ！</button>
                     </div>
                 </div>
             `;
             document.getElementById('user-view').prepend(card);
             const marker = L.marker([item.lat, item.lng]).addTo(map).bindPopup(item.shop);
-            markers.push({marker, card});
             if(isAuto) showBanner(`🔔 新着！${item.shop}で${item.name}が出品！`);
         }
-        function showBanner(text) {
-            const b = document.getElementById('notification-banner');
-            document.getElementById('banner-text').innerText = text;
-            b.style.top = "20px"; setTimeout(()=>b.style.top="-100px", 3000);
-        }
+
+        // --- 買いトク！ (マイルームへ移動) ---
         function handleBuy(btn) {
-            if(currentKept >= 3 && !confirm("⚠️ 買いすぎ注意！\n本当に食べきれますか？")) return;
+            if(myPantry.length >= 3 && !confirm("⚠️ 買いすぎ注意！\nマイルームに3つあります。本当に食べきれますか？")) return;
+            
             const card = btn.closest('.card');
-            card.classList.add('is-kept');
-            card.querySelector('.btn-buy').style.display='none';
-            card.querySelector('.btn-eat').disabled = false;
-            currentKept++;
-            showModal("🎉 レスキュー完了", "まだ確定ではありません。\n美味しく食べたら「たべキリ！」ボタンを押してクーポンをGETしましょう！");
+            const item = card.itemData;
+            item.boughtAt = Date.now(); // 購入時刻
+            
+            // マイルームに保存
+            myPantry.push(item);
+            localStorage.setItem('tb_pantry', JSON.stringify(myPantry));
+            
+            // ホームから消す
+            card.remove();
+            
+            renderPantry();
+            showModal("🎉 ナイスレスキュー！", "商品が「マイルーム」に移動しました。\n食べ終わったら「たべキリ！」を押してね！");
         }
-        function handleEat(btn) {
-            const card = btn.closest('.card'); const item = card.itemData;
-            const newCoupon = { id: Date.now(), shop: item.shop, title: item.couponTitle || "特別クーポン", saved: item.oldPrice - item.newPrice, exp: "有効期限: 1週間以内" };
-            myCoupons.push(newCoupon); localStorage.setItem('tb_coupons', JSON.stringify(myCoupons));
-            card.remove(); currentKept--;
-            renderCoupons(); switchTab('coupon');
-            showModal("🎟️ クーポンGET!", "完食ありがとうございます！\n「クーポン」タブに追加されました。");
+
+        // --- マイルーム表示 ---
+        function renderPantry() {
+            const list = document.getElementById('pantry-list');
+            list.innerHTML = "";
+            if(myPantry.length === 0) list.innerHTML = "<p style='color:#aaa;'>マイルームは空です</p>";
+
+            myPantry.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = 'card is-kept';
+                const percent = Math.floor(((item.oldPrice - item.newPrice) / item.oldPrice) * 100);
+                
+                card.innerHTML = `
+                    <div class="badge-off" style="background:var(--primary);">KEEP中</div>
+                    <div class="card-content-row">
+                        <div class="food-info">
+                            <div class="emoji">${item.icon || '🍱'}</div>
+                            <div class="details">
+                                <span class="shop-address">🏠 ${item.shop}</span>
+                                <h3>${item.name}</h3>
+                                <div style="font-size:12px; color:red;">早く食べてね！</div>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn-eat" onclick="handleEat(${idx})">たべキリ！</button>
+                        </div>
+                    </div>
+                `;
+                list.prepend(card);
+            });
         }
+
+        // --- たべキリ！ (クーポンGET & SNSシェア) ---
+        function handleEat(idx) {
+            const item = myPantry[idx];
+            const newCoupon = { id: Date.now(), shop: item.shop, title: item.couponTitle || "特別クーポン", saved: item.oldPrice - item.newPrice, exp: "1週間以内" };
+            
+            myCoupons.push(newCoupon);
+            localStorage.setItem('tb_coupons', JSON.stringify(myCoupons));
+            
+            // マイルームから削除
+            myPantry.splice(idx, 1);
+            localStorage.setItem('tb_pantry', JSON.stringify(myPantry));
+            
+            renderPantry();
+            renderCoupons();
+            
+            // SNSシェアボタン設定
+            const shareText = `「${item.name}」を完食して食品ロスを減らしました！\n#たべキリ #食品ロス削減`;
+            const appUrl = window.location.href;
+            document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(appUrl)}`;
+            document.getElementById('share-line').href = `https://line.me/R/msg/text/?${encodeURIComponent(shareText + " " + appUrl)}`;
+            document.getElementById('share-area').style.display = 'flex';
+
+            showModal("😋 完食ありがとう！", "うるるちゃんも大喜びです！\nクーポンをGETしました。SNSで自慢しよう！");
+            
+            // 閉じるボタンの動作を変える
+            const btn = document.getElementById('modal-btn');
+            btn.onclick = () => {
+                closeModal();
+                switchTab('coupon');
+            };
+        }
+
+        // --- その他の機能 (クーポン、履歴、ランキング) ---
         function renderCoupons() {
             const list = document.getElementById('coupon-list'); list.innerHTML = "";
             if(myCoupons.length === 0) { list.innerHTML = "<p style='color:#aaa; margin-top:20px;'>現在クーポンはありません</p>"; return; }
@@ -425,6 +432,7 @@
             document.getElementById('modal-text').innerText = "店員さんに見せてください";
             document.getElementById('qr-area').style.display = "block";
             document.getElementById('rating-stars').style.display = "none"; 
+            document.getElementById('share-area').style.display = "none";
             document.getElementById('qrcode').innerHTML = "";
             new QRCode(document.getElementById("qrcode"), {text: "USED-"+myCoupons[idx].id, width:150, height:150});
             const btn = document.getElementById('modal-btn');
@@ -440,70 +448,93 @@
             m.style.display = 'flex';
         }
         function setRating(n) { currentRating = n; updateStars(); }
-        function updateStars() {
-            const stars = document.querySelectorAll('#rating-stars span');
-            stars.forEach((s, i) => { s.style.color = i < currentRating ? 'var(--gold)' : '#ddd'; });
-        }
+        function updateStars() { const stars = document.querySelectorAll('#rating-stars span'); stars.forEach((s, i) => { s.style.color = i < currentRating ? 'var(--gold)' : '#ddd'; }); }
         function finishRescue() {
             if(currentRating === 0) { alert("星を選んでください！"); return; }
             const coupon = myCoupons[targetCouponIdx];
             userStats.count++; userStats.money += coupon.saved; localStorage.setItem('tb_stats', JSON.stringify(userStats)); updateDashboard();
-            myHistory.push({ shop: coupon.shop, title: coupon.title, date: new Date().toLocaleDateString(), rating: currentRating }); localStorage.setItem('tb_history', JSON.stringify(myHistory)); renderHistory();
-            myCoupons.splice(targetCouponIdx, 1); localStorage.setItem('tb_coupons', JSON.stringify(myCoupons)); renderCoupons();
-            // 自分のランキング更新
-            renderRanking();
+            myHistory.push({ shop: coupon.shop, title: coupon.title, date: new Date().toLocaleDateString(), rating: currentRating }); localStorage.setItem('tb_history', JSON.stringify(myHistory)); 
+            myCoupons.splice(targetCouponIdx, 1); localStorage.setItem('tb_coupons', JSON.stringify(myCoupons)); renderCoupons(); renderRanking();
             closeModal(); alert("レスキュー完了！\n実績が更新されました！");
         }
-        function renderHistory() {
-            const list = document.getElementById('history-list'); list.innerHTML = "";
-            myHistory.slice().reverse().forEach(h => {
-                const stars = "★".repeat(h.rating) + "☆".repeat(5-h.rating);
-                list.innerHTML += `<div class="history-item"><div><div style="font-weight:bold;">${h.shop}</div><div style="font-size:12px; color:#666;">${h.title}使用</div></div><div style="text-align:right;"><div class="history-stars">${stars}</div><div class="history-date">${h.date}</div></div></div>`;
+        function renderRanking() {
+            const list = document.getElementById('ranking-list');
+            const myData = { name: userName || "あなた", count: userStats.count, isMe: true };
+            let all = [...myFriends, myData].sort((a,b) => b.count - a.count);
+            list.innerHTML = "";
+            all.forEach((u, i) => {
+                const cls = u.isMe ? "ranking-item rank-you" : "ranking-item";
+                const medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : '';
+                list.innerHTML += `<div class="${cls}"><div class="rank-num">${medal || i+1}</div><div class="rank-user">${u.name}</div><div class="rank-score">${u.count}回</div></div>`;
             });
+        }
+        function addFriend() {
+            const friendName = prompt("友達の名前を入力して追加！");
+            if(friendName) {
+                const randomScore = Math.floor(Math.random() * 20) + Math.max(0, userStats.count - 5);
+                myFriends.push({ name: friendName, count: randomScore });
+                localStorage.setItem('tb_friends', JSON.stringify(myFriends));
+                renderRanking(); alert(`${friendName}さんを追加しました！`);
+            }
+        }
+        function inviteFriend() {
+            const text = `食品ロス削減アプリ「たべキリ！」\n私(${userName})と一緒に競い合おう！\nここから始めてね 👇`;
+            const url = window.location.href;
+            if (navigator.share) { navigator.share({ title: 'たべキリ！', text: text, url: url }).catch(()=>{}); }
+            else { alert("URLをコピーしました！友達に送ってね\n" + url); }
+        }
+
+        // --- 共通UI ---
+        function showModal(title, text) {
+            document.getElementById('modal-title').innerText = title; document.getElementById('modal-text').innerText = text;
+            document.getElementById('qr-area').style.display="none"; document.getElementById('rating-stars').style.display="none"; document.getElementById('share-area').style.display="none";
+            const btn = document.getElementById('modal-btn'); btn.innerText = "OK"; btn.onclick = closeModal;
+            document.getElementById('modal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function showBanner(text) {
+            const b = document.getElementById('notification-banner'); document.getElementById('banner-text').innerText = text;
+            b.style.top = "20px"; setTimeout(()=>b.style.top="-100px", 3000);
         }
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
+            if(tabName === 'pantry') renderPantry();
         }
-        function showModal(title, text) {
-            document.getElementById('modal-title').innerText = title; document.getElementById('modal-text').innerText = text;
-            document.getElementById('qr-area').style.display="none"; document.getElementById('rating-stars').style.display="none";
-            const btn = document.getElementById('modal-btn'); btn.innerText = "OK"; btn.onclick = closeModal;
-            document.getElementById('modal').style.display = 'flex';
-        }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+        // --- オートデモ ---
         function startAutoDemo() {
             const demoItems = [
-                { shop: "ベーカリー・パン吉", name: "クロワッサン詰め合わせ", oldPrice: 800, newPrice: 350, couponTitle:"ラスク1袋", icon:"🥐", images: ["https://images.unsplash.com/photo-1555507036-ab1f40388085?w=500"] },
-                { shop: "らーめん道場", name: "チャーシュー丼", oldPrice: 500, newPrice: 200, couponTitle:"トッピング無料", icon:"🍚", images: ["https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500"] },
-                { shop: "カフェ・ラテ", name: "サンドイッチBOX", oldPrice: 600, newPrice: 300, couponTitle:"コーヒー半額", icon:"🥪", images: ["https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500"] }
+                { id:1, shop: "パン吉", name: "クロワッサン", oldPrice: 800, newPrice: 350, couponTitle:"ラスク", icon:"🥐", images: ["https://images.unsplash.com/photo-1555507036-ab1f40388085?w=500"] },
+                { id:2, shop: "らーめん炎", name: "チャーシュー丼", oldPrice: 500, newPrice: 200, couponTitle:"トッピング", icon:"🍚", images: ["https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500"] },
+                { id:3, shop: "カフェ・ラテ", name: "サンドイッチ", oldPrice: 600, newPrice: 300, couponTitle:"コーヒー半額", icon:"🥪", images: ["https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500"] }
             ];
             addProduct({...demoItems[0], lat:userLat, lng:userLng});
             setInterval(() => {
                 const item = demoItems[Math.floor(Math.random() * demoItems.length)];
-                const lat = userLat + (Math.random()-0.5)*0.01; const lng = userLng + (Math.random()-0.5)*0.01;
-                addProduct({...item, lat, lng}, true);
+                // IDをユニークにする
+                const uniqueItem = {...item, id: Date.now() + Math.random(), lat: userLat+(Math.random()-0.5)*0.01, lng: userLng+(Math.random()-0.5)*0.01};
+                addProduct(uniqueItem, true);
             }, 8000);
         }
+
+        // --- 店長機能 ---
         let tapCount = 0;
-        document.getElementById('app-header').addEventListener('click', () => {
-            tapCount++; if(tapCount === 5) { if(prompt("Pass") === '0000') { document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); document.getElementById('admin-view').classList.add('active'); } tapCount = 0; }
-        });
+        document.getElementById('app-header').addEventListener('click', () => { tapCount++; if(tapCount === 5) { if(prompt("Pass") === '0000') { document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); document.getElementById('admin-view').classList.add('active'); } tapCount = 0; } });
         let html5QrcodeScanner = null;
         function startScanner() {
             document.getElementById('scanner-modal').style.display = 'flex';
             if(html5QrcodeScanner) html5QrcodeScanner.clear();
             html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-            html5QrcodeScanner.render(onScanSuccess, ()=>{});
+            html5QrcodeScanner.render((txt)=>{alert("確認: "+txt); stopScanner();}, ()=>{});
         }
-        function onScanSuccess(txt) { alert("確認完了: " + txt); stopScanner(); }
         function stopScanner() { document.getElementById('scanner-modal').style.display = 'none'; if(html5QrcodeScanner) html5QrcodeScanner.clear(); }
         function addNewProduct() {
             const shop = document.getElementById('input-shop').value; const name = document.getElementById('input-name').value;
-            const couponTitle = document.getElementById('input-coupon-title').value; const oldP = document.getElementById('input-old').value; const newP = document.getElementById('input-new').value;
+            const oldP = document.getElementById('input-old').value; const newP = document.getElementById('input-new').value;
             if(!shop || !name) return alert("入力してください");
-            addProduct({ shop, name, couponTitle, oldPrice:oldP, newPrice:newP, lat: userLat, lng: userLng, icon:"🎁" });
+            addProduct({ id: Date.now(), shop, name, oldPrice:oldP, newPrice:newP, lat: userLat, lng: userLng, icon:"🎁" });
             alert("登録しました"); switchTab('home');
         }
     </script>
