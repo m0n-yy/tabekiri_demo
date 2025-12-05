@@ -1,3 +1,4 @@
 Made by Google Gemini
-urutu : our original character!
+
+ururu : our original character!
         Made by ChatGPT
